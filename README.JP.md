@@ -1,29 +1,29 @@
 ![](./assets/banner.jpg)
 
-<h1 align="center">Open-LLM-VTuber</h1>
+<h1 align="center">yawidoc</h1>
 <h3 align="center">
 
-[![GitHub release](https://img.shields.io/github/v/release/Open-LLM-VTuber/Open-LLM-VTuber)](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/releases) 
-[![license](https://img.shields.io/github/license/Open-LLM-VTuber/Open-LLM-VTuber)](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/blob/master/LICENSE) 
-[![CodeQL](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/actions/workflows/codeql.yml/badge.svg)](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/actions/workflows/codeql.yml)
-[![Ruff](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/actions/workflows/ruff.yml/badge.svg)](https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/actions/workflows/ruff.yml)
-[![Docker](https://img.shields.io/badge/Open-LLM-VTuber%2FOpen--LLM--VTuber-%25230db7ed.svg?logo=docker&logoColor=blue&labelColor=white&color=blue)](https://hub.docker.com/r/Open-LLM-VTuber/open-llm-vtuber) 
+[![GitHub release](https://img.shields.io/github/v/release/yawidoc/yawidoc)](https://github.com/yawidoc/yawidoc/releases) 
+[![license](https://img.shields.io/github/license/yawidoc/yawidoc)](https://github.com/yawidoc/yawidoc/blob/master/LICENSE) 
+[![CodeQL](https://github.com/yawidoc/yawidoc/actions/workflows/codeql.yml/badge.svg)](https://github.com/yawidoc/yawidoc/actions/workflows/codeql.yml)
+[![Ruff](https://github.com/yawidoc/yawidoc/actions/workflows/ruff.yml/badge.svg)](https://github.com/yawidoc/yawidoc/actions/workflows/ruff.yml)
+[![Docker](https://img.shields.io/badge/yawidoc%2FOpen--LLM--VTuber-%25230db7ed.svg?logo=docker&logoColor=blue&labelColor=white&color=blue)](https://hub.docker.com/r/yawidoc/open-llm-vtuber) 
 [![QQ User Group](https://img.shields.io/badge/QQ_User_Group-792615362-white?style=flat&logo=qq&logoColor=white)](https://qm.qq.com/q/ngvNUQpuKI)
 [![Static Badge](https://img.shields.io/badge/Join%20Chat-Zulip?style=flat&logo=zulip&label=Zulip(dev-community)&color=blue&link=https%3A%2F%2Folv.zulipchat.com)](https://olv.zulipchat.com)
 
-> **📢 v2.0 開発中**: 現在、Open-LLM-VTuber v2.0の開発に注力しています — これはコードベースの完全な書き直しです。v2.0は現在、初期の議論と計画段階にあります。v1への機能リクエストに関する新しいissueやpull requestの提出はお控えください。v2の議論に参加したい、または貢献したい場合は、[Zulip](https://olv.zulipchat.com)の開発者コミュニティにご参加ください。週次ミーティングのスケジュールはZulipで発表されます。v1のバグ修正と既存のpull requestの対応は継続します。
+> **📢 v2.0 開発中**: 現在、yawidoc v2.0の開発に注力しています — これはコードベースの完全な書き直しです。v2.0は現在、初期の議論と計画段階にあります。v1への機能リクエストに関する新しいissueやpull requestの提出はお控えください。v2の議論に参加したい、または貢献したい場合は、[Zulip](https://olv.zulipchat.com)の開発者コミュニティにご参加ください。週次ミーティングのスケジュールはZulipで発表されます。v1のバグ修正と既存のpull requestの対応は継続します。
 
 
 [![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/yi.ting)
 [![](https://dcbadge.limes.pink/api/server/3UDA8YFDXx)](https://discord.gg/3UDA8YFDXx)
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Open-LLM-VTuber/Open-LLM-VTuber)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/yawidoc/yawidoc)
 
 [English README](./README.md) | [中文 README](./README.CN.md) | [한국어 README](./README.KR.md) | 日本語 README
 
-[ドキュメント](https://open-llm-vtuber.github.io/docs/quick-start) | [![Roadmap](https://img.shields.io/badge/Roadmap-GitHub_Project-yellow)](https://github.com/orgs/Open-LLM-VTuber/projects/2)
+[ドキュメント](https://open-llm-vtuber.github.io/docs/quick-start) | [![Roadmap](https://img.shields.io/badge/Roadmap-GitHub_Project-yellow)](https://github.com/orgs/yawidoc/projects/2)
 
-<a href="https://trendshift.io/repositories/12358" target="_blank"><img src="https://trendshift.io/api/badge/repositories/12358" alt="Open-LLM-VTuber%2FOpen-LLM-VTuber | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+<a href="https://trendshift.io/repositories/12358" target="_blank"><img src="https://trendshift.io/api/badge/repositories/12358" alt="yawidoc%2Fyawidoc | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
 </h3>
 
@@ -40,7 +40,7 @@
 
 ## ⭐️ このプロジェクトは何ですか？
 
-**Open-LLM-VTuber** は、**リアルタイム音声会話** と **視覚認識** をサポートするだけでなく、生き生きとした **Live2Dアバター** を備えた **音声対話型AIコンパニオン** です。すべての機能はコンピュータ上で完全にオフラインで実行できます！
+**yawidoc** は、**リアルタイム音声会話** と **視覚認識** をサポートするだけでなく、生き生きとした **Live2Dアバター** を備えた **音声対話型AIコンパニオン** です。すべての機能はコンピュータ上で完全にオフラインで実行できます！
 
 個人的なAIコンパニオンとして活用できます — `virtual girlfriend`、`boyfriend`、`cute pet` など、期待に合わせてどのようなキャラクターにもなれます。このプロジェクトは `Windows`、`macOS`、`Linux` を完全にサポートしており、**Webバージョン** と **デスクトップクライアント** の2つの使用モードを提供します。特に **透明背景のデスクトップマスコットモード** をサポートしており、AIコンパニオンが画面上のどこにでも一緒にいることができます。
 
@@ -48,7 +48,7 @@
 
 バックエンドサポートの面では、様々なLLM推論、テキスト読み上げ（TTS）、音声認識ソリューションを統合しました。AIコンパニオンをカスタマイズしたい場合は、[Character Customization Guide](https://open-llm-vtuber.github.io/docs/user-guide/live2d)を参照して、AIコンパニオンの外見や性格をカスタマイズできます。
 
-このプロジェクトが `Open-LLM-Companion` や `Open-LLM-Waifu` ではなく `Open-LLM-Vtuber` という名前である理由は、初期の開発目標が **Windows以外のプラットフォームでもオフラインで実行可能なオープンソースソリューションを活用** し、**クローズドなAI Vtuberである `neuro-sama` を再現** することだったためです。
+このプロジェクトが `Open-LLM-Companion` や `Open-LLM-Waifu` ではなく `yawidoc` という名前である理由は、初期の開発目標が **Windows以外のプラットフォームでもオフラインで実行可能なオープンソースソリューションを活用** し、**クローズドなAI Vtuberである `neuro-sama` を再現** することだったためです。
 
 ### 👀 効果実証
 | ![](assets/i1.jpg) | ![](assets/i2.jpg) |
@@ -143,10 +143,10 @@
 
 このプロジェクトを可能にしてくださった **コントリビューターとメンテナの方々に感謝いたします。**
 
-<a href="https://github.com/Open-LLM-VTuber/Open-LLM-VTuber/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=Open-LLM-VTuber/Open-LLM-VTuber" />
+<a href="https://github.com/yawidoc/yawidoc/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=yawidoc/yawidoc" />
 </a>
 
 ## スター履歴 (Star History)
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Open-LLM-VTuber/open-llm-vtuber&type=Date)](https://star-history.com/#Open-LLM-VTuber/open-llm-vtuber&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=yawidoc/open-llm-vtuber&type=Date)](https://star-history.com/#yawidoc/open-llm-vtuber&Date)
