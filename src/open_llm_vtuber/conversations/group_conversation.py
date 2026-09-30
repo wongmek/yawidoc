@@ -5,7 +5,7 @@ from loguru import logger
 from fastapi import WebSocket
 import numpy as np
 
-from ..agent.output_types import AudioOutput, SentenceOutput
+from ..agent.output_types import AudioOutput, SentenceOutput, DisplayText, Actions
 
 from .conversation_utils import (
     create_batch_input,
@@ -350,38 +350,81 @@ async def process_member_response(
     full_response = ""
 
     try:
-        # agent.chat now yields Union[SentenceOutput, Dict[str, Any]]
-        agent_output_stream = context.agent_engine.chat(batch_input)
+        # Check if we should use translation mode (bypass agent and translate context)
+        if context.character_config.use_translation and context.translate_engine is not None:
+            logger.info("Translation mode enabled: bypassing agent and translating context")
+            # Extract text from batch_input
+            input_text = ""
+            if hasattr(batch_input, 'texts') and batch_input.texts:
+                input_text = " ".join([t.content for t in batch_input.texts])
+            logger.info(f"Context text to translate: {input_text}")
+            # Translate the context text
+            translated_text = context.translate_engine.translate(input_text)
+            logger.info(f"Translated context: {translated_text}")
+            # Create display text for the translated text (to be shown in UI)
+            display_text = DisplayText(
+                text=translated_text,
+                name=context.character_config.character_name,
+                avatar=context.character_config.avatar,
+            )
+            # Create empty actions
+            actions = Actions()
+            # Create a SentenceOutput with the translated text
+            sentence_output = SentenceOutput(
+                display_text=display_text,
+                tts_text=translated_text,
+                actions=actions,
+            )
+            # Process the sentence output (but disable translation in process_agent_output to avoid double translation)
+            response_part = await process_agent_output(
+                output=sentence_output,
+                character_config=context.character_config,
+                live2d_model=context.live2d_model,
+                tts_engine=context.tts_engine,
+                websocket_send=current_ws_send,
+                tts_manager=tts_manager,
+                translate_engine=None,  # Disable translation to avoid double translation
+            )
+            # Ensure response_part is treated as a string before concatenation
+            response_part_str = (
+                str(response_part) if response_part is not None else ""
+            )
+            full_response += response_part_str  # Accumulate text response
+        else:
+            # Fallback to normal agent processing
+            logger.info("Using normal agent processing")
+            # agent.chat now yields Union[SentenceOutput, Dict[str, Any]]
+            agent_output_stream = context.agent_engine.chat(batch_input)
 
-        async for output_item in agent_output_stream:
-            if (
-                isinstance(output_item, dict)
-                and output_item.get("type") == "tool_call_status"
-            ):
-                if broadcast_func and group_members:
-                    logger.debug(f"Broadcasting tool status update: {output_item}")
-                    output_item["name"] = context.character_config.character_name
-                    await broadcast_func(group_members, output_item)
+            async for output_item in agent_output_stream:
+                if (
+                    isinstance(output_item, dict)
+                    and output_item.get("type") == "tool_call_status"
+                ):
+                    if broadcast_func and group_members:
+                        logger.debug(f"Broadcasting tool status update: {output_item}")
+                        output_item["name"] = context.character_config.character_name
+                        await broadcast_func(group_members, output_item)
+                    else:
+                        logger.warning(
+                            "Cannot broadcast tool status: broadcast_func or group_members missing."
+                        )
+                elif isinstance(output_item, (SentenceOutput, AudioOutput)):
+                    # Handle SentenceOutput or AudioOutput: Send to current user, broadcast audio later if needed
+                    response_part = await process_agent_output(
+                        output=output_item,
+                        character_config=context.character_config,
+                        live2d_model=context.live2d_model,
+                        tts_engine=context.tts_engine,
+                        websocket_send=current_ws_send,  # Send TTS/display text directly to speaker's client
+                        tts_manager=tts_manager,
+                        translate_engine=context.translate_engine,
+                    )
+                    full_response += response_part  # Accumulate text response
                 else:
                     logger.warning(
-                        "Cannot broadcast tool status: broadcast_func or group_members missing."
+                        f"Received unexpected item type from agent chat stream: {type(output_item)}"
                     )
-            elif isinstance(output_item, (SentenceOutput, AudioOutput)):
-                # Handle SentenceOutput or AudioOutput: Send to current user, broadcast audio later if needed
-                response_part = await process_agent_output(
-                    output=output_item,
-                    character_config=context.character_config,
-                    live2d_model=context.live2d_model,
-                    tts_engine=context.tts_engine,
-                    websocket_send=current_ws_send,  # Send TTS/display text directly to speaker's client
-                    tts_manager=tts_manager,
-                    translate_engine=context.translate_engine,
-                )
-                full_response += response_part  # Accumulate text response
-            else:
-                logger.warning(
-                    f"Received unexpected item type from agent chat stream: {type(output_item)}"
-                )
 
     except Exception as e:
         logger.exception(f"Error processing group member response stream: {e}")

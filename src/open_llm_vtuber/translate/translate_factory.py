@@ -1,5 +1,6 @@
 from .deeplx import DeepLXTranslate
 from .tencent import TencentTranslate
+from .nllb_translator import NLLBTranslator
 from .translate_interface import TranslateInterface
 
 
@@ -21,6 +22,17 @@ class TranslateFactory:
                 region=translate_provider_config.get("region"),
                 source_lang=translate_provider_config.get("source_lang"),
                 target_lang=translate_provider_config.get("target_lang"),
+            )
+        elif translate_provider == "nllb":
+            # service_context passes the provider section's model_dump() directly,
+            # so the keys are flat: model / src_lang / tgt_lang / device
+            return NLLBTranslator(
+                model_name=translate_provider_config.get(
+                    "model", "facebook/nllb-200-distilled-600M"
+                ),
+                src_lang=translate_provider_config.get("src_lang", "zsm_Latn"),
+                tgt_lang=translate_provider_config.get("tgt_lang", "tha_Thai"),
+                device=translate_provider_config.get("device", "cpu"),
             )
         else:
             raise ValueError(f"Unsupported translate provider: {translate_provider}")

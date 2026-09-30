@@ -19,7 +19,18 @@ from ..chat_history_manager import store_message
 from ..service_context import ServiceContext
 
 # Import necessary types from agent outputs
-from ..agent.output_types import SentenceOutput, AudioOutput
+from ..agent.output_types import SentenceOutput, AudioOutput, DisplayText, Actions
+
+# Translator greeting (Thai + Jawi) — used in translation mode when the
+# frontend sends the "ai-speak-signal" (proactive speak) trigger. The stock
+# English prompt (prompts/utils/proactive_speak_prompt.txt) would otherwise
+# be machine-translated to an odd Thai sentence ("ขอพูดอะไรที่น่าสนใจ...").
+# Only the Thai line is spoken (the TTS voice is Thai); both lines are shown.
+TRANSLATOR_GREETING_TEXT_THAI = "ต้องการให้ฉันช่วยแปลภาษาคำไหนแจ้งได้เลย"
+TRANSLATOR_GREETING_TEXT_JAWI = "کلاو نق ساي تولوڠ ترجمه بهاس، کبو ساي"
+TRANSLATOR_GREETING_TEXT = (
+    TRANSLATOR_GREETING_TEXT_THAI + " \n" + TRANSLATOR_GREETING_TEXT_JAWI
+)
 
 
 async def process_single_conversation(
@@ -86,41 +97,88 @@ async def process_single_conversation(
             logger.info(f"With {len(images)} images")
 
         try:
-            # agent.chat yields Union[SentenceOutput, Dict[str, Any]]
-            agent_output_stream = context.agent_engine.chat(batch_input)
-
-            async for output_item in agent_output_stream:
-                if (
-                    isinstance(output_item, dict)
-                    and output_item.get("type") == "tool_call_status"
-                ):
-                    # Handle tool status event: send WebSocket message
-                    output_item["name"] = context.character_config.character_name
-                    logger.debug(f"Sending tool status update: {output_item}")
-
-                    await websocket_send(json.dumps(output_item))
-
-                elif isinstance(output_item, (SentenceOutput, AudioOutput)):
-                    # Handle SentenceOutput or AudioOutput
-                    response_part = await process_agent_output(
-                        output=output_item,
-                        character_config=context.character_config,
-                        live2d_model=context.live2d_model,
-                        tts_engine=context.tts_engine,
-                        websocket_send=websocket_send,  # Pass websocket_send for audio/tts messages
-                        tts_manager=tts_manager,
-                        translate_engine=context.translate_engine,
-                    )
-                    # Ensure response_part is treated as a string before concatenation
-                    response_part_str = (
-                        str(response_part) if response_part is not None else ""
-                    )
-                    full_response += response_part_str  # Accumulate text response
+            # Check if we should use translation mode (bypass agent and translate user input)
+            if context.character_config.use_translation and context.translate_engine is not None:
+                logger.info("Translation mode enabled: bypassing agent and translating user input")
+                if metadata and metadata.get("proactive_speak"):
+                    # Proactive speak trigger: greet the user bilingually
+                    # instead of translating the default English prompt.
+                    # Only the Thai line is spoken by the TTS voice.
+                    output_text = TRANSLATOR_GREETING_TEXT
+                    tts_text = TRANSLATOR_GREETING_TEXT_THAI
+                    logger.info(f"Translator greeting: {output_text}")
                 else:
-                    logger.warning(
-                        f"Received unexpected item type from agent chat stream: {type(output_item)}"
-                    )
-                    logger.debug(f"Unexpected item content: {output_item}")
+                    # Translate the user's input text
+                    output_text = context.translate_engine.translate(input_text)
+                    tts_text = output_text
+                    logger.info(f"Translated text: {output_text}")
+                # Create display text for the translated text (to be shown in UI)
+                display_text = DisplayText(
+                    text=output_text,
+                    name=context.character_config.character_name,
+                    avatar=context.character_config.avatar,
+                )
+                # Create empty actions
+                actions = Actions()
+                # Create a SentenceOutput with the translated text
+                sentence_output = SentenceOutput(
+                    display_text=display_text,
+                    tts_text=tts_text,
+                    actions=actions,
+                )
+                # Process the sentence output (but disable translation in process_agent_output to avoid double translation)
+                response_part = await process_agent_output(
+                    output=sentence_output,
+                    character_config=context.character_config,
+                    live2d_model=context.live2d_model,
+                    tts_engine=context.tts_engine,
+                    websocket_send=websocket_send,
+                    tts_manager=tts_manager,
+                    translate_engine=None,  # Disable translation to avoid double translation
+                )
+                # Ensure response_part is treated as a string before concatenation
+                response_part_str = (
+                    str(response_part) if response_part is not None else ""
+                )
+                full_response += response_part_str  # Accumulate text response
+            else:
+                # Fallback to normal agent processing
+                logger.info("Using normal agent processing")
+                # agent.chat yields Union[SentenceOutput, Dict[str, Any]]
+                agent_output_stream = context.agent_engine.chat(batch_input)
+
+                async for output_item in agent_output_stream:
+                    if (
+                        isinstance(output_item, dict)
+                        and output_item.get("type") == "tool_call_status"
+                    ):
+                        # Handle tool status event: send WebSocket message
+                        output_item["name"] = context.character_config.character_name
+                        logger.debug(f"Sending tool status update: {output_item}")
+
+                        await websocket_send(json.dumps(output_item))
+
+                    elif isinstance(output_item, (SentenceOutput, AudioOutput)):
+                        # Handle SentenceOutput or AudioOutput
+                        response_part = await process_agent_output(
+                            output=output_item,
+                            character_config=context.character_config,
+                            live2d_model=context.live2d_model,
+                            tts_engine=context.tts_engine,
+                            websocket_send=websocket_send,  # Pass websocket_send for audio/tts messages
+                            tts_manager=tts_manager,
+                            translate_engine=context.translate_engine,
+                        )
+                        # Ensure response_part is treated as a string before concatenation
+                        response_part_str = (
+                            str(response_part) if response_part is not None else ""
+                        )
+                        full_response += response_part_str  # Accumulate text response
+                    else:
+                        logger.warning(
+                            f"Received unexpected item type from agent chat stream: {type(output_item)}"
+                        )
+                        logger.debug(f"Unexpected item content: {output_item}")
 
         except Exception as e:
             logger.exception(

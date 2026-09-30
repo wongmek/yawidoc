@@ -50,6 +50,34 @@ class TencentConfig(I18nMixin):
     }
 
 
+class NLLBConfig(I18nMixin):
+    """Configuration for NLLB (No Language Left Behind) local translation."""
+
+    model: str = Field("facebook/nllb-200-distilled-600M", alias="model")
+    src_lang: str = Field("zsm_Latn", alias="src_lang")
+    tgt_lang: str = Field("tha_Thai", alias="tgt_lang")
+    device: Literal["cpu", "cuda"] = Field("cpu", alias="device")
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "model": Description(
+            en="NLLB model name or path (Hugging Face)",
+            zh="NLLB 模型名称或路径（Hugging Face）",
+        ),
+        "src_lang": Description(
+            en="FLORES-200 source language code (e.g. zsm_Latn for Malay in Latin script)",
+            zh="FLORES-200 源语言代码（如 zsm_Latn，拉丁字母马来语）",
+        ),
+        "tgt_lang": Description(
+            en="FLORES-200 target language code (e.g. tha_Thai for Thai)",
+            zh="FLORES-200 目标语言代码（如 tha_Thai，泰语）",
+        ),
+        "device": Description(
+            en="Device to run the NLLB model on (cpu or cuda)",
+            zh="运行 NLLB 模型的设备（cpu 或 cuda）",
+        ),
+    }
+
+
 # --- Main TranslatorConfig model ---
 
 
@@ -57,11 +85,12 @@ class TranslatorConfig(I18nMixin):
     """Configuration for translation services."""
 
     translate_audio: bool = Field(..., alias="translate_audio")
-    translate_provider: Literal["deeplx", "tencent"] = Field(
+    translate_provider: Literal["deeplx", "tencent", "nllb"] = Field(
         ..., alias="translate_provider"
     )
     deeplx: Optional[DeepLXConfig] = Field(None, alias="deeplx")
     tencent: Optional[TencentConfig] = Field(None, alias="tencent")
+    nllb: Optional[NLLBConfig] = Field(None, alias="nllb")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "translate_audio": Description(
@@ -76,6 +105,9 @@ class TranslatorConfig(I18nMixin):
         ),
         "tencent": Description(
             en="Configuration for TenCent translation service", zh="腾讯 翻译服务配置"
+        ),
+        "nllb": Description(
+            en="Configuration for NLLB local translation", zh="NLLB 本地翻译配置"
         ),
     }
 
@@ -92,6 +124,10 @@ class TranslatorConfig(I18nMixin):
             elif translate_provider == "tencent" and values.tencent is None:
                 raise ValueError(
                     "Tencent configuration must be provided when translate_audio is True and translate_provider is 'tencent'"
+                )
+            elif translate_provider == "nllb" and values.nllb is None:
+                raise ValueError(
+                    "NLLB configuration must be provided when translate_audio is True and translate_provider is 'nllb'"
                 )
 
         return values

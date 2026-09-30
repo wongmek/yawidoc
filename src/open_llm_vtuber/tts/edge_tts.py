@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 
 import edge_tts
 from loguru import logger
@@ -39,15 +40,21 @@ class TTSEngine(TTSInterface):
         """
         file_name = self.generate_cache_file_name(file_name_no_ext, self.file_extension)
 
-        try:
-            communicate = edge_tts.Communicate(text, self.voice)
-            communicate.save_sync(file_name)
-        except Exception as e:
-            logger.critical(f"\nError: edge-tts unable to generate audio: {e}")
-            logger.critical("It's possible that edge-tts is blocked in your region.")
-            return None
-
-        return file_name
+        # Retry once — edge-tts intermittently fails transiently with
+        # "No audio was received" (service hiccup / throttling), which would
+        # otherwise leave the character silently displaying text.
+        for attempt in range(2):
+            try:
+                communicate = edge_tts.Communicate(text, self.voice)
+                communicate.save_sync(file_name)
+                return file_name
+            except Exception as e:
+                logger.critical(f"\nError: edge-tts unable to generate audio: {e}")
+                logger.critical("It's possible that edge-tts is blocked in your region.")
+                if attempt == 0:
+                    logger.info("Retrying edge-tts once after 2 seconds...")
+                    time.sleep(2)
+        return None
 
 
 # en-US-AvaMultilingualNeural

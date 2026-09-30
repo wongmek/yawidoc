@@ -27,6 +27,7 @@ class CharacterConfig(I18nMixin):
     tts_preprocessor_config: TTSPreprocessorConfig = Field(
         ..., alias="tts_preprocessor_config"
     )
+    use_translation: bool = Field(default=False, alias="use_translation")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "conf_name": Description(
@@ -66,6 +67,10 @@ class CharacterConfig(I18nMixin):
         ),
         "avatar": Description(
             en="Avatar image path for the character", zh="角色头像图片路径"
+        ),
+        "use_translation": Description(
+            en="Whether to use translation mode (bypass agent and translate user input)",
+            zh="是否使用翻译模式（绕过代理并翻译用户输入）"
         ),
     }
 
